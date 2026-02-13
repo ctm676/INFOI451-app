@@ -18,15 +18,15 @@ res.sendFile(path.join(__dirname, "views", "about.html"));
 });
 // employees route
 app.get("/employees.html", (req, res) => {
-res.send("Employees route");
+res.sendFile(path.join(__dirname, "views", "employees.html"));
 });
 // managers route
 app.get("/managers.html", (req, res) => {
-res.send("Managers route");
+res.sendFile(path.join(__dirname, "views", "managers.html"));
 });
 // departments route
 app.get("/departments.html", (req, res) => {
-res.send("Departments route");
+res.sendFile(path.join(__dirname, "views", "departments.html"));
 });
 // 404 error handler for undefined routes
 app.use((req, res) => {
