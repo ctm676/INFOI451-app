@@ -62,9 +62,13 @@ app.get("/addImage.html", (req, res) => {
     res.sendFile(path.join(__dirname, "views", "addImage.html"));
 });
 // POST /images/add
-app.post("/addImage.html", upload.single("imageFile"), (req, res) => {
+app.post("/images/add", upload.single("imageFile"), (req, res) => {
     console.log("Uploaded file details: ", req.file);
     res.redirect("/images.html");
+});
+// GET /images.html
+app.get("/images.html", (req, res) => {
+    res.sendFile(path.join(__dirname, "views", "images.html"));
 });
 // GET /images
 const imagesDir = "./public/images/uploaded";
