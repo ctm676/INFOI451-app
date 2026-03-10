@@ -1,58 +1,83 @@
 const fs = require("node:fs/promises");
-export var employees = [];
-export var departments = [];
+const { get } = require("node:http");
+var employees = [];
+var departments = [];
 
-function initialize() {
-    const promise = Promise.resolve(0);
-
-    promise.then(() => {
-        employees = JSON.parse(fs.readFile("./data/employees.json", "utf8", (err, data) => {
-            if (err) throw err;
-            console.log(data);
-        }));
-
-        departments = JSON.parse(fs.readFile("./data/departments.json", "utf8", (err, data) => {
-            if (err) throw err;
-            console.log(data);
-        }));
-    });
+async function initialize() {
+    try {
+        return await Promise.all([
+            fs.readFile("./data/employees.json", "utf8").then(data => employees = JSON.parse(data)),
+            fs.readFile("./data/departments.json", "utf8").then(data_1 => departments = JSON.parse(data_1))
+        ]);
+    } catch (err) {
+        console.error("Error initializing data:", err);
+        throw err;
+    }
 }
 
-function getAllEmployees() {
-    return new Promise((resolve, reject) => {
-        const employees = initialize();
-
+module.exports = {
+    getAllEmployees: async () => {
+        await initialize();
         if (employees.length === 0) {
-            reject("no results returned");
-        } else {
-            resolve(employees);
+            throw new Error("no results returned");
         }
-    });
-}
-
-function getManagers() {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            const employees = initialize();
-            const managers = employees.filter(employee => employee.isManager);
-
-            if (managers.length > 0) {
-                resolve(managers);
+        return employees;
+    },
+    getEmployeesByStatus: async (status) => {
+        await initialize();
+        const filteredEmployees = employees.filter(employee => employee.status === status);
+        if (filteredEmployees.length === 0) {
+            throw new Error("no results returned");
+        }
+        return filteredEmployees;
+    },
+    getEmployeesByDepartment: async (department) => {
+        await initialize();
+        const filteredEmployees = employees.filter(employee => employee.department === department);
+        if (filteredEmployees.length === 0) {
+            throw new Error("no results returned");
+        }
+        return filteredEmployees;
+    },
+    getEmployeesByManager: async (manager) => {
+        await initialize();
+        const filteredEmployees = employees.filter(employee => employee.employeeManagerNum === parseInt(manager));
+        if (filteredEmployees.length === 0) {
+            throw new Error("no results returned");
+        }
+        return filteredEmployees;
+    },
+    getManagers: async () => {
+        await initialize();
+        const managers = employees.filter(employee => employee.isManager);
+        if (managers.length === 0) {
+            throw new Error("no results returned");
+        }
+        return managers;
+    },
+    getDepartments: async () => {
+        await initialize();
+        if (departments.length === 0) {
+            throw new Error("no results returned");
+        }
+        return departments;
+    },
+    addEmployee: async (employeeData) => {
+        try {
+            await initialize();
+            if (employeeData.isManager === undefined) {
+                employeeData.isManager = false;
             } else {
-                reject("no results returned");
+                employeeData.isManager = true;
             }
-        }, 1000);
-    });
-}
-
-function getDepartments() {
-    return new Promise((resolve, reject) => {
-        const departmentData = initialize();
-
-        if (departmentData.length > 0) {
-            resolve(departmentData);
-        } else {
-            reject("no results returned");
+            employeeData.employeeNum = employees.length + 1;
+            employees.push(employeeData);
+            return await fs.writeFile("./data/employees.json", JSON.stringify(employees));
+        } catch (err) {
+            throw new Error("unable to write to file");
         }
-    });
-}
+    }
+};
+
+
+
