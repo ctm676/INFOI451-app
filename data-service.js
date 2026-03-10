@@ -1,4 +1,3 @@
-const { resolve } = require("node:dns");
 const fs = require("node:fs/promises");
 export var employees = [];
 export var departments = [];
